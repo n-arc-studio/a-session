@@ -80,7 +80,10 @@ using (var scope = app.Services.CreateScope())
 
 static async Task EnsureDatabaseExistsAsync(string connectionString)
 {
-    var builder = new NpgsqlConnectionStringBuilder(connectionString);
+    var builder = new NpgsqlConnectionStringBuilder(connectionString)
+    {
+        Encoding = "UTF8"
+    };
     var databaseName = builder.Database;
     builder.Database = "postgres"; // Connect to default database
     
@@ -94,7 +97,7 @@ static async Task EnsureDatabaseExistsAsync(string connectionString)
     if (result == null)
     {
         // Database doesn't exist, create it
-        command.CommandText = $"CREATE DATABASE \"{databaseName}\"";
+        command.CommandText = $"CREATE DATABASE \"{databaseName}\" ENCODING 'UTF8'";
         await command.ExecuteNonQueryAsync();
     }
 }
