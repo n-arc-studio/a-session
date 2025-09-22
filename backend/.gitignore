@@ -1,0 +1,17 @@
+# 共通
+obj/
+bin/
+
+# Flutter
+frontend/.dart_tool/
+frontend/.idea/
+frontend/.vscode/
+frontend/build/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.packages
+frontend/pubspec.lock
+
+# ASP.NET
+backend/obj/
+backend/bin/
