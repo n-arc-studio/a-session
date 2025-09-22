@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using ASession.Data;
 using ASession.Models;
+using ASession.Services;
 
 namespace ASession.Controllers
 {
@@ -10,10 +14,12 @@ namespace ASession.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ASessionDbContext _context;
+        private readonly JwtService _jwtService;
 
-        public UsersController(ASessionDbContext context)
+        public UsersController(ASessionDbContext context, JwtService jwtService)
         {
             _context = context;
+            _jwtService = jwtService;
         }
 
         // GET: api/Users
@@ -100,5 +106,102 @@ namespace ASession.Controllers
         {
             return _context.Users.Any(e => e.Id == id);
         }
+
+        // POST: api/Users/register
+        [HttpPost("register")]
+        public async Task<ActionResult<User>> Register([FromBody] RegisterRequest request)
+        {
+            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+            {
+                return BadRequest("Email already exists");
+            }
+
+            var passwordHasher = new PasswordHasher<User>();
+            var user = new User
+            {
+                Name = request.Name,
+                Email = request.Email,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            user.PasswordHash = passwordHasher.HashPassword(user, request.Password);
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+        }
+
+        // POST: api/Users/login
+        [HttpPost("login")]
+        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            if (user == null)
+            {
+                return Unauthorized("Invalid email or password");
+            }
+
+            var passwordHasher = new PasswordHasher<User>();
+            var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+            if (result == PasswordVerificationResult.Failed)
+            {
+                return Unauthorized("Invalid email or password");
+            }
+
+            var token = _jwtService.GenerateToken(user);
+            return new LoginResponse { Token = token, User = user };
+        }
+
+        // POST: api/Users/logout
+        [HttpPost("logout")]
+        [Authorize]
+        public IActionResult Logout()
+        {
+            // JWT is stateless, client should discard the token
+            return Ok(new { message = "Logged out successfully" });
+        }
+
+        // DELETE: api/Users/delete-account
+        [HttpDelete("delete-account")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Account deleted successfully" });
+        }
+    }
+
+    public class RegisterRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class LoginRequest
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class LoginResponse
+    {
+        public string Token { get; set; } = string.Empty;
+        public User User { get; set; } = null!;
     }
 }
