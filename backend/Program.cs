@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ASession.Data;
 using ASession.Services;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,7 +66,37 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ASessionDbContext>();
-    dbContext.Database.Migrate();
+    
+    // Create database if it doesn't exist
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (connectionString != null)
+    {
+        await EnsureDatabaseExistsAsync(connectionString);
+    }
+    
+    // Apply migrations
+    await dbContext.Database.MigrateAsync();
+}
+
+static async Task EnsureDatabaseExistsAsync(string connectionString)
+{
+    var builder = new NpgsqlConnectionStringBuilder(connectionString);
+    var databaseName = builder.Database;
+    builder.Database = "postgres"; // Connect to default database
+    
+    using var connection = new NpgsqlConnection(builder.ToString());
+    await connection.OpenAsync();
+    
+    using var command = connection.CreateCommand();
+    command.CommandText = $"SELECT 1 FROM pg_database WHERE datname = '{databaseName}'";
+    
+    var result = await command.ExecuteScalarAsync();
+    if (result == null)
+    {
+        // Database doesn't exist, create it
+        command.CommandText = $"CREATE DATABASE \"{databaseName}\"";
+        await command.ExecuteNonQueryAsync();
+    }
 }
 
 app.Run();
