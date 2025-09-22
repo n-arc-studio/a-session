@@ -10,6 +10,15 @@
 				"$msCompile"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Run Backend (ASP.NET)",
+			"type": "shell",
+			"command": "dotnet run",
+			"args": ["--project", "backend/a-session.csproj", "--no-launch-profile"],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
 		}
 	]
 }

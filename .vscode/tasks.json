@@ -4,19 +4,94 @@
 		{
 			"label": "Build Backend (ASP.NET)",
 			"type": "shell",
-			"command": "dotnet build",
-			"args": [],
-			"problemMatcher": [
-				"$msCompile"
-			],
-			"group": "build"
+			"command": "dotnet",
+			"args": ["build"],
+			"options": {
+				"cwd": "${workspaceFolder}/backend"
+			},
+			"problemMatcher": ["$msCompile"],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new",
+				"group": "backend"
+			}
+		},
+		{
+			"label": "Run Backend (ASP.NET)",
+			"type": "shell",
+			"command": "dotnet",
+			"args": ["run"],
+			"options": {
+				"cwd": "${workspaceFolder}/backend"
+			},
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "csharp",
+				"pattern": {
+					"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error)\\s+(\\w+):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"column": 3,
+					"severity": 4,
+					"code": 5,
+					"message": 6
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "^.*Now listening on.*$",
+					"endsPattern": "^.*Application started.*$"
+				}
+			},
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new",
+				"group": "backend"
+			}
 		},
 		{
 			"label": "Build Frontend (Flutter Web)",
 			"type": "shell",
-			"command": "flutter build web",
-			"args": [],
-			"group": "build"
+			"command": "flutter",
+			"args": ["build", "web"],
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new",
+				"group": "frontend"
+			}
+		},
+		{
+			"label": "Run Frontend (Flutter Web)",
+			"type": "shell",
+			"command": "flutter",
+			"args": ["run", "-d", "web-server", "--web-port", "3000"],
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"isBackground": true,
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new",
+				"group": "frontend"
+			}
+		},
+		{
+			"label": "Run All (Backend + Frontend)",
+			"dependsOrder": "parallel",
+			"dependsOn": [
+				"Run Backend (ASP.NET)",
+				"Run Frontend (Flutter Web)"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always"
+			}
 		}
 	]
 }

@@ -7,6 +7,14 @@
 			"command": "flutter build web",
 			"args": [],
 			"group": "build"
+		},
+		{
+			"label": "Run Frontend (Flutter Web)",
+			"type": "shell",
+			"command": "flutter run",
+			"args": ["-d", "chrome"],
+			"isBackground": true,
+			"group": "build"
 		}
 	]
 }
