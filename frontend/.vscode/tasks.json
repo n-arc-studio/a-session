@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Frontend (Flutter Web)",
+			"type": "shell",
+			"command": "flutter build web",
+			"args": [],
+			"group": "build"
+		}
+	]
+}
