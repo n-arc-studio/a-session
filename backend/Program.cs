@@ -5,6 +5,8 @@ using System.Text;
 using ASession.Data;
 using ASession.Services;
 using Npgsql;
+using ASession.Models;
+using BCrypt.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,6 +78,9 @@ using (var scope = app.Services.CreateScope())
     
     // Apply migrations
     await dbContext.Database.MigrateAsync();
+    
+    // Create admin user if not exists
+    await CreateAdminUserIfNotExistsAsync(dbContext, builder.Configuration);
 }
 
 static async Task EnsureDatabaseExistsAsync(string connectionString)
@@ -100,5 +105,36 @@ static async Task EnsureDatabaseExistsAsync(string connectionString)
 }
 
 app.Run();
+
+async Task CreateAdminUserIfNotExistsAsync(ASessionDbContext dbContext, IConfiguration configuration)
+{
+    var adminEmail = configuration["AdminUser:Email"];
+    var adminPassword = configuration["AdminUser:Password"];
+
+    if (string.IsNullOrEmpty(adminEmail) || string.IsNullOrEmpty(adminPassword))
+    {
+        throw new InvalidOperationException("Admin user email or password is not configured.");
+    }
+
+    // Check if the admin user already exists
+    var adminUser = await dbContext.Users
+        .FirstOrDefaultAsync(u => u.Email == adminEmail);
+
+    if (adminUser == null)
+    {
+        // Create a new admin user
+        adminUser = new User
+        {
+            Email = adminEmail,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+            IsAdmin = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        dbContext.Users.Add(adminUser);
+        await dbContext.SaveChangesAsync();
+    }
+}
 
 
