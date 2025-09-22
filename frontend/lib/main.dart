@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'services/auth_service.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   runApp(const ASessionApp());
@@ -15,8 +17,48 @@ class ASessionApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const AuthWrapper(),
     );
+  }
+}
+
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  final AuthService _authService = AuthService();
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAuth();
+  }
+
+  Future<void> _initializeAuth() async {
+    await _authService.initialize();
+    setState(() {
+      _isInitialized = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return _authService.isLoggedIn
+        ? const HomeScreen()
+        : const LoginScreen();
   }
 }
 
