@@ -53,19 +53,27 @@ a-sessionは、チームでのアカペラ練習をもっと簡単にできる�
 ## 技術構成
 - バックエンド: ASP.NET Web API
 - フロントエンド: Flutter
+- データベース: PostgreSQL
 - ユーザー認証：JWT
 
 
 ## セットアップ手順
 
 ### バックエンド (ASP.NET)
-1. PowerShellで以下を実行:
+1. PostgreSQLをインストールし、起動:
+   - Windows: PostgreSQL公式サイトからダウンロードしてインストール
+   - デフォルト設定: ユーザー名 `postgres`, パスワード `postgres`
+   - ポート: 5432
+
+2. PowerShellで以下を実行:
 	```pwsh
 	cd backend
 	dotnet restore
 	dotnet run
 	```
-2. APIは http://localhost:5000 で起動します。
+   ※ データベースが存在しない場合は自動的に作成されます。
+
+3. APIは http://localhost:5187 で起動します。
 
 ### フロントエンド (Flutter)
 1. PowerShellで以下を実行:

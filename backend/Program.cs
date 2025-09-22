@@ -71,13 +71,6 @@ using (var scope = app.Services.CreateScope())
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     if (connectionString != null)
     {
-        // Check for password in environment variable
-        var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
-        if (!string.IsNullOrEmpty(password) && !connectionString.Contains("Password="))
-        {
-            connectionString += $";Password={password}";
-        }
-        
         await EnsureDatabaseExistsAsync(connectionString);
     }
     
