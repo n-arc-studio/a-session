@@ -10,7 +10,11 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
-  final _formKey = GlobalKey<FormState>();
+  // Use separate keys for login and register forms to avoid
+  // Duplicate GlobalKey exceptions when both forms are present
+  // in a TabBarView.
+  final _loginFormKey = GlobalKey<FormState>();
+  final _registerFormKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
@@ -70,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   }
 
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!(_loginFormKey.currentState?.validate() ?? false)) return;
 
     setState(() => _isLoading = true);
 
@@ -97,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   }
 
   Future<void> _handleRegister() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!(_registerFormKey.currentState?.validate() ?? false)) return;
 
     setState(() => _isLoading = true);
 
@@ -113,6 +117,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         _showSuccessDialog('登録が完了しました。ログインしてください。');
         _tabController.animateTo(0); // ログインタブに切り替え
         _clearRegisterForm();
+        // Clear validation state on the register form as well
+        _registerFormKey.currentState?.reset();
       }
     } catch (e) {
       if (mounted) {
@@ -159,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Form(
-        key: _formKey,
+        key: _loginFormKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -220,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Form(
-        key: _formKey,
+        key: _registerFormKey,
         child: SingleChildScrollView(
           child: Column(
             children: [

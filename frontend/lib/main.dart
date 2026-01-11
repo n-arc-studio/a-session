@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'services/auth_service.dart';
 import 'screens/login_screen.dart';
+import 'screens/otp_verification_screen.dart';
+import 'screens/password_reset_screen.dart';
+import 'screens/forgot_password_screen.dart';
 
 void main() {
   runApp(const ASessionApp());
@@ -17,6 +20,30 @@ class ASessionApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const AuthWrapper(),
+        '/login': (context) => const LoginScreen(),
+        '/forgot-password': (context) => const ForgotPasswordScreen(),
+        '/otp-verification': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          return OtpVerificationScreen(
+            email: args?['email'] ?? '',
+            purpose: args?['purpose'] ?? 'verify',
+            onSuccess: () => Navigator.of(context).pushNamedAndRemoveUntil(
+              '/',
+              (route) => false,
+            ),
+          );
+        },
+        '/reset-password': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          return PasswordResetScreen(
+            email: args?['email'] ?? '',
+            code: args?['code'] ?? '',
+          );
+        },
+      },
       home: const AuthWrapper(),
     );
   }

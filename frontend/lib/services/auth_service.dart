@@ -52,6 +52,42 @@ class AuthService {
     }
   }
 
+  Future<bool> sendVerificationOtp(String email) async {
+    try {
+      await _apiService.sendOtp(email, 'verify');
+      return true;
+    } catch (e) {
+      throw Exception('OTP送信に失敗しました: $e');
+    }
+  }
+
+  Future<bool> verifyEmail(String email, String code) async {
+    try {
+      await _apiService.verifyEmail(email, code);
+      return true;
+    } catch (e) {
+      throw Exception('メール認証に失敗しました: $e');
+    }
+  }
+
+  Future<bool> requestPasswordReset(String email) async {
+    try {
+      await _apiService.requestPasswordReset(email);
+      return true;
+    } catch (e) {
+      throw Exception('リセット要求に失敗しました: $e');
+    }
+  }
+
+  Future<bool> resetPassword(String email, String code, String newPassword) async {
+    try {
+      await _apiService.resetPassword(email, code, newPassword);
+      return true;
+    } catch (e) {
+      throw Exception('パスワードリセットに失敗しました: $e');
+    }
+  }
+
   Future<void> logout() async {
     try {
       if (_token != null) {

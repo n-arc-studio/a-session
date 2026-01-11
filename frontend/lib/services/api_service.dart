@@ -75,4 +75,56 @@ class ApiService {
       throw Exception('Failed to delete account: ${response.body}');
     }
   }
+
+  Future<void> sendOtp(String email, String purpose) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/users/send-otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'purpose': purpose}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to send OTP: ${response.body}');
+    }
+  }
+
+  Future<void> verifyEmail(String email, String code) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/users/verify-email'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'code': code}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to verify email: ${response.body}');
+    }
+  }
+
+  Future<void> requestPasswordReset(String email) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/users/request-password-reset'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to request password reset: ${response.body}');
+    }
+  }
+
+  Future<void> resetPassword(String email, String code, String newPassword) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/users/reset-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'code': code,
+        'newPassword': newPassword,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to reset password: ${response.body}');
+    }
+  }
 }

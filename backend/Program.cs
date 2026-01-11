@@ -6,7 +6,8 @@ using ASession.Data;
 using ASession.Services;
 using Npgsql;
 using ASession.Models;
-using BCrypt.Net;
+using Microsoft.AspNetCore.Identity;
+using static BCrypt.Net.BCrypt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddDbContext<ASessionDbContext>(options =>
 
 // Add JWT Service
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 // Add Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -119,14 +121,14 @@ async Task CreateAdminUserIfNotExistsAsync(ASessionDbContext dbContext, IConfigu
     // Check if the admin user already exists
     var adminUser = await dbContext.Users
         .FirstOrDefaultAsync(u => u.Email == adminEmail);
-
     if (adminUser == null)
     {
-        // Create a new admin user
+        var hashedPassword = HashPassword(adminPassword);
+        
         adminUser = new User
         {
             Email = adminEmail,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+            PasswordHash = hashedPassword,
             IsAdmin = true,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -134,6 +136,11 @@ async Task CreateAdminUserIfNotExistsAsync(ASessionDbContext dbContext, IConfigu
 
         dbContext.Users.Add(adminUser);
         await dbContext.SaveChangesAsync();
+        Console.WriteLine("Admin user created successfully.");
+    }
+    else
+    {
+        Console.WriteLine("Admin user already exists.");
     }
 }
 

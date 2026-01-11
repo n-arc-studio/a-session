@@ -15,3 +15,8 @@ frontend/pubspec.lock
 # ASP.NET
 backend/obj/
 backend/bin/
+# Secrets (Development only)
+appsettings.Development.json
+appsettings.Secrets.json
+appsettings.*.json
+.user-secrets/

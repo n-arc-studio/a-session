@@ -16,6 +16,7 @@ namespace ASession.Data
         public DbSet<MidiFile> MidiFiles { get; set; }
         public DbSet<Recording> Recordings { get; set; }
         public DbSet<PracticeSchedule> PracticeSchedules { get; set; }
+        public DbSet<OtpCode> OtpCodes { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -73,6 +74,16 @@ namespace ASession.Data
                 .HasOne(ps => ps.Team)
                 .WithMany(t => t.PracticeSchedules)
                 .HasForeignKey(ps => ps.TeamId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // OTP
+            modelBuilder.Entity<OtpCode>()
+                .HasIndex(o => new { o.UserId, o.Purpose, o.Code })
+                .IsUnique();
+            modelBuilder.Entity<OtpCode>()
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
