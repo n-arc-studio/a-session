@@ -44,6 +44,17 @@ CREATE TABLE IF NOT EXISTS takes (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS reviews (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  song_id UUID NOT NULL REFERENCES songs(id) ON DELETE CASCADE,
+  reviewer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_songs_project_id ON songs(project_id);
 CREATE INDEX IF NOT EXISTS idx_takes_song_id ON takes(song_id);
 CREATE INDEX IF NOT EXISTS idx_takes_user_id ON takes(user_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_song_id ON reviews(song_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_reviewer_id ON reviews(reviewer_id);

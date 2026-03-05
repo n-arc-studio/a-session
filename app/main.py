@@ -4,12 +4,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.db import get_connection
 from app.schemas import (
+    CreateReviewRequest,
     CreateSongRequest,
     CreateTakeRequest,
     DownloadUrlResponse,
     HealthResponse,
     PresignUploadRequest,
     PresignUploadResponse,
+    ReviewOut,
     SongOut,
     TakeOut,
 )
@@ -69,6 +71,54 @@ def list_songs(project_id: str = Query(...)) -> list[SongOut]:
             cur.execute(query, (project_id,))
             rows = cur.fetchall()
     return [SongOut(**row) for row in rows]
+
+
+@app.get("/songs/{song_id}/midi-download-url", response_model=DownloadUrlResponse)
+def get_song_midi_download_url(song_id: str) -> DownloadUrlResponse:
+    query = "SELECT midi_object_key FROM songs WHERE id = %s"
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, (song_id,))
+            row = cur.fetchone()
+
+    if row is None:
+        raise HTTPException(status_code=404, detail="song not found")
+
+    expires = 900
+    s3 = get_s3_client()
+    url = s3.generate_presigned_url(
+        ClientMethod="get_object",
+        Params={"Bucket": settings.minio_bucket_score, "Key": row["midi_object_key"]},
+        ExpiresIn=expires,
+    )
+
+    return DownloadUrlResponse(download_url=url, expires_in_seconds=expires)
+
+
+@app.get("/songs/{song_id}/score-download-url", response_model=DownloadUrlResponse)
+def get_song_score_download_url(song_id: str) -> DownloadUrlResponse:
+    query = "SELECT musicxml_object_key FROM songs WHERE id = %s"
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, (song_id,))
+            row = cur.fetchone()
+
+    if row is None:
+        raise HTTPException(status_code=404, detail="song not found")
+
+    score_key = row["musicxml_object_key"]
+    if score_key is None:
+        raise HTTPException(status_code=400, detail="score not set")
+
+    expires = 900
+    s3 = get_s3_client()
+    url = s3.generate_presigned_url(
+        ClientMethod="get_object",
+        Params={"Bucket": settings.minio_bucket_score, "Key": score_key},
+        ExpiresIn=expires,
+    )
+
+    return DownloadUrlResponse(download_url=url, expires_in_seconds=expires)
 
 
 @app.post("/takes/presign-upload", response_model=PresignUploadResponse)
@@ -153,3 +203,40 @@ def get_take_download_url(take_id: str) -> DownloadUrlResponse:
     )
 
     return DownloadUrlResponse(download_url=url, expires_in_seconds=expires)
+
+
+@app.post("/reviews", response_model=ReviewOut)
+def create_review(req: CreateReviewRequest) -> ReviewOut:
+    query = """
+        INSERT INTO reviews (song_id, reviewer_id, rating, comment)
+        VALUES (%s, %s, %s, %s)
+        RETURNING id, song_id, reviewer_id, rating, comment
+    """
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                query,
+                (
+                    req.song_id,
+                    req.reviewer_id,
+                    req.rating,
+                    req.comment,
+                ),
+            )
+            row = cur.fetchone()
+    return ReviewOut(**row)
+
+
+@app.get("/reviews", response_model=list[ReviewOut])
+def list_reviews(song_id: str = Query(...)) -> list[ReviewOut]:
+    query = """
+        SELECT id, song_id, reviewer_id, rating, comment
+        FROM reviews
+        WHERE song_id = %s
+        ORDER BY created_at DESC
+    """
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, (song_id,))
+            rows = cur.fetchall()
+    return [ReviewOut(**row) for row in rows]

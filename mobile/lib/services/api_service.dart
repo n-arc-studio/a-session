@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import '../models/song.dart';
 import '../models/take.dart';
+import '../models/review.dart';
 
 class PresignedUpload {
   const PresignedUpload({
@@ -142,5 +143,41 @@ class ApiService {
   Future<String> getTakeDownloadUrl(String takeId) async {
     final response = await _dio.get('/takes/$takeId/download-url');
     return (response.data as Map<String, dynamic>)['download_url'] as String;
+  }
+
+  Future<String> getSongMidiDownloadUrl(String songId) async {
+    final response = await _dio.get('/songs/$songId/midi-download-url');
+    return (response.data as Map<String, dynamic>)['download_url'] as String;
+  }
+
+  Future<String> getSongScoreDownloadUrl(String songId) async {
+    final response = await _dio.get('/songs/$songId/score-download-url');
+    return (response.data as Map<String, dynamic>)['download_url'] as String;
+  }
+
+  Future<Review> createReview({
+    required String songId,
+    required String reviewerId,
+    required int rating,
+    String? comment,
+  }) async {
+    final response = await _dio.post(
+      '/reviews',
+      data: {
+        'song_id': songId,
+        'reviewer_id': reviewerId,
+        'rating': rating,
+        'comment': comment,
+      },
+    );
+    return Review.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<Review>> listReviews(String songId) async {
+    final response = await _dio.get('/reviews', queryParameters: {'song_id': songId});
+    final data = response.data as List<dynamic>;
+    return data
+        .map((item) => Review.fromJson(item as Map<String, dynamic>))
+        .toList(growable: false);
   }
 }

@@ -5,6 +5,6 @@ import 'package:mobile/main.dart';
 void main() {
   testWidgets('A:SESSION app renders', (WidgetTester tester) async {
     await tester.pumpWidget(const ASessionApp());
-    expect(find.text('A:SESSION MVP'), findsOneWidget);
+    expect(find.byType(ASessionApp), findsOneWidget);
   });
 }

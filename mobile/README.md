@@ -9,6 +9,9 @@ Flutterクライアントです。以下をMVPとして実装しています。
 - Presigned URLアップロード (`/takes/presign-upload`)
 - Take登録 (`/takes`)
 - チームTake一覧と同時再生
+- 役割別導線（アレンジャー/練習者/評価者）
+- 楽譜/MIDI/テイクのダウンロードURL取得
+- 第三者レビュー登録・一覧表示
 
 ## 前提
 
@@ -38,3 +41,16 @@ flutter run
 
 - 譜面表示は `songs.musicxml_object_key` を使って `MinIO/score-bucket` から読み込みます。
 - リアルタイムトレースとMIDI再生同期は次フェーズで追加する想定です。
+
+## 役割別導線
+
+- アレンジャー
+	- Homeで`アレンジャー`を選択
+	- `楽譜/MIDIを登録する`からLibraryへ遷移し、曲にMIDI/MusicXMLキーを登録
+- 練習者
+	- Sessionで楽譜・MIDIダウンロードURLを取得
+	- 録音してReviewでアップロード
+	- Teamで他メンバーのトラックを再生/ダウンロード
+- 評価者
+	- Reviewで評価（1-5）とコメントを送信
+	- 曲ごとのレビュー一覧を取得

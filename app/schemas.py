@@ -58,3 +58,18 @@ class TakeOut(BaseModel):
 class DownloadUrlResponse(BaseModel):
     download_url: str
     expires_in_seconds: int
+
+
+class CreateReviewRequest(BaseModel):
+    song_id: str
+    reviewer_id: str
+    rating: int = Field(ge=1, le=5)
+    comment: str | None = None
+
+
+class ReviewOut(BaseModel):
+    id: str
+    song_id: str
+    reviewer_id: str
+    rating: int
+    comment: str | None
