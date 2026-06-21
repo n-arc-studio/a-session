@@ -99,6 +99,52 @@ Defined in `.env.example`:
 - MinIO: `MINIO_ENDPOINT`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_SECURE`, `MINIO_BUCKET_AUDIO`, `MINIO_BUCKET_SCORE`
 - CORS: `CORS_ORIGINS`
 
+## CI/CD Pipeline
+
+### GitHub Actions Workflows
+
+This project uses GitHub Actions for continuous integration and release management.
+
+#### CI (Continuous Integration)
+
+**File:** `.github/workflows/ci.yml`
+
+Runs on every push and pull request to `main` or `master`:
+- Tests against Python 3.10, 3.11, and 3.12
+- Runs all unit tests with pytest
+- Generates coverage reports (uploaded to Codecov)
+
+```bash
+# Trigger manually via:
+gh workflow run ci.yml --ref main
+```
+
+#### Release Pipeline
+
+**File:** `.github/workflows/release.yml`
+
+Triggers on version tags (`v*`) or manual dispatch:
+1. **Build & Push** — Builds Docker image and pushes to GitHub Container Registry (GHCR)
+2. **Deploy Staging** — Auto-deploys to staging environment
+3. **Deploy Production** — Deploys to production (manual trigger only)
+
+```bash
+# Create a release tag
+git tag v1.0.0
+git push origin v1.0.0
+
+# Manual dispatch with environment selection
+gh workflow run release.yml --ref main -f environment=staging
+```
+
+### Environment Setup
+
+Before the first run, create GitHub Environments:
+
+1. Go to **Settings → Environments** in your repository
+2. Create `staging` and `production` environments
+3. Add required secrets (e.g., deployment credentials) to each environment
+
 ## API Endpoints (Current)
 
 - `GET /health`
