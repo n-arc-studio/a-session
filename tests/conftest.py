@@ -262,10 +262,27 @@ class TestDB:
     @staticmethod
     def get_connection():
         """Return the current SQLite connection from the fixture state."""
-        return SQLiteConnectionWrapper(_test_state["conn"])
+        conn = _test_state.get("conn")
+        if conn is None:
+            raise RuntimeError("Test database not initialized. Run tests with pytest.")
+        return SQLiteConnectionWrapper(conn)
 
 # Replace app.db BEFORE any test file imports it
-sys.modules["app.db"] = TestDB
+sys.modules["app.db"] = TestDB()
+
+# Mock boto3 at module level for storage gateway (MinioStorageGateway uses boto3 directly)
+class FakeS3Client:
+    def generate_presigned_url(self, *args, **kwargs):
+        return "https://example.com/test.mp3"
+
+class FakeBoto3:
+    @staticmethod
+    def client(*args, **kwargs):
+        return FakeS3Client()
+
+sys.modules["boto3"] = FakeBoto3()
+sys.modules["botocore"] = MagicMock()
+sys.modules["botocore.client"] = MagicMock()
 
 
 @pytest.fixture()
