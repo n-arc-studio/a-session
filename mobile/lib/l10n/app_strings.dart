@@ -19,7 +19,7 @@ class AppStrings {
 
   String tr(String ja, String en) => _isJa ? ja : en;
 
-  String get appTitle => tr('A:SESSION', 'A:SESSION');
+    String get appTitle => tr('A:SESSION Studio', 'A:SESSION Studio');
   String get settings => tr('接続設定', 'Connection Settings');
   String get apiBaseUrl => tr('API Base URL', 'API Base URL');
   String get minioBaseUrl => tr('MinIO Base URL', 'MinIO Base URL');
@@ -37,19 +37,19 @@ class AppStrings {
   String get songCreated => tr('曲を作成しました', 'Song created');
 
   String get home => tr('ホーム', 'Home');
-  String get session => tr('セッション', 'Session');
+  String get session => tr('練習', 'Practice');
   String get review => tr('レビュー', 'Review');
   String get team => tr('チーム', 'Team');
   String get library => tr('ライブラリ', 'Library');
 
-  String get practiceFlow => tr('練習フロー', 'Practice Flow');
+  String get practiceFlow => tr('今日の練習フロー', 'Today\'s Practice Flow');
   String get selectSongFirst =>
-      tr('ライブラリで曲を選択して開始します。', 'Select a song in Library to start.');
+      tr('まず曲を選ぶと練習を開始できます。', 'Select a song to start practicing.');
   String currentSong(String title) =>
-      tr('現在の曲: $title', 'Current song: $title');
-  String get resumeSession => tr('セッション再開', 'Resume Session');
+      tr('選択中の曲: $title', 'Selected song: $title');
+  String get resumeSession => tr('練習をはじめる', 'Start Practice');
   String get openLibrary => tr('ライブラリを開く', 'Open Library');
-  String get refreshSongs => tr('曲一覧を更新', 'Refresh Songs');
+  String get refreshSongs => tr('曲を同期', 'Sync Songs');
 
   String get step1 => tr('曲を選ぶ', 'Select Song');
   String get step2 => tr('練習して録音', 'Practice and Record');
@@ -58,7 +58,7 @@ class AppStrings {
   String get arranger => tr('アレンジャー', 'Arranger');
   String get practitioner => tr('練習者', 'Practitioner');
   String get evaluator => tr('評価者', 'Evaluator');
-  String get openTeam => tr('チームを開く', 'Open Team');
+    String get openTeam => tr('チームを見る', 'Open Team');
 
   String get arrangerStep1 =>
       tr('楽譜を登録してチームに共有', 'Register score and share with teammates');
@@ -75,13 +75,13 @@ class AppStrings {
   String get practitionerStep3 =>
       tr('トラック別に共有・取得', 'Share and fetch takes by track');
   String get practitionerPrimaryAction =>
-      tr('練習セッションへ', 'Go to practice session');
+      tr('練習画面へ', 'Go to Practice');
 
   String get evaluatorStep1 => tr('対象曲を選択', 'Select target song');
   String get evaluatorStep2 =>
       tr('第三者レビューと評価を記入', 'Write third-party review and rating');
   String get evaluatorStep3 => tr('評価結果を共有', 'Share review result');
-  String get evaluatorPrimaryAction => tr('評価を記入する', 'Write evaluation');
+    String get evaluatorPrimaryAction => tr('レビューを書く', 'Write Review');
 
   String get selectMusicXmlSong => tr(
     'ライブラリでMusicXML付きの曲を選択してください。',
@@ -90,8 +90,8 @@ class AppStrings {
   String bpmLabel(int bpm) => 'BPM $bpm';
   String get song => tr('曲', 'Song');
   String get teamSharedSong => tr('チーム公開曲', 'Team Shared Song');
-  String get refresh => tr('更新', 'Refresh');
-  String get newSong => tr('新規曲', 'New Song');
+    String get refresh => tr('再読み込み', 'Reload');
+    String get newSong => tr('曲を追加', 'Add Song');
   String get countIn => tr('3拍カウントイン', 'Count-in 3 beats');
   String guideVolumeLabel(int percent) =>
       tr('ガイド音量 $percent%', 'Guide Volume $percent%');
@@ -114,10 +114,10 @@ class AppStrings {
   String trackVolumeLabel(int percent) =>
       tr('音量: $percent%', 'Volume: $percent%');
   String get teammateTrackDownloads =>
-      tr('チームメイト音声（トラック別）', 'Teammate Track Audio');
+      tr('チームの録音（トラック別）', 'Team Takes by Track');
   String teammateTakeTitle(int trackNo, String userId) =>
       tr('Track $trackNo - $userId', 'Track $trackNo - $userId');
-  String get myRecording => tr('自分の録音', 'My Recording');
+    String get myRecording => tr('自分の録音', 'My Recording');
   String trackLabel(int index) => tr('Track $index', 'Track $index');
   String get percussionTrack =>
       tr('Percussion (MIDI Ch.10)', 'Percussion (MIDI Ch.10)');
@@ -134,30 +134,30 @@ class AppStrings {
   String get takeReview => tr('テイク確認', 'Take Review');
   String lastTake(String path) => tr('最新テイク: $path', 'Last take: $path');
   String offsetMs(int ms) => tr('オフセット: $ms ms', 'Offset: $ms ms');
-  String get saveAndShare => tr('保存して共有', 'Save and Share');
-  String get rerecord => tr('録り直し', 'Re-record');
+    String get saveAndShare => tr('テイクを保存して共有', 'Save and Share Take');
+    String get rerecord => tr('もう一度録音', 'Record Again');
   String get retry => tr('再試行', 'Retry');
 
-  String get loadTeamTakes => tr('チームテイク取得', 'Load Team Takes');
-  String get playSelectedTogether => tr('選択テイクを同時再生', 'Play Selected Together');
+    String get loadTeamTakes => tr('チームの録音を読み込む', 'Load Team Takes');
+    String get playSelectedTogether => tr('選択した録音を重ねて再生', 'Play Selected Together');
   String get downloadTake => tr('このトラックをダウンロード', 'Download this track');
-  String get loadSongs => tr('曲を読み込む', 'Load Songs');
-  String get searchSongs => tr('曲を検索', 'Search songs');
+    String get loadSongs => tr('曲を読み込む', 'Load Songs');
+    String get searchSongs => tr('曲名で検索', 'Search songs');
   String get noSongsMatch => tr('一致する曲がありません。', 'No matching songs.');
 
   String get thirdPartyReview => tr('第三者レビュー', 'Third-party Review');
   String ratingLabel(int rating) =>
       tr('評価: $rating / 5', 'Rating: $rating / 5');
   String get reviewComment => tr('レビューコメント', 'Review Comment');
-  String get submitReview => tr('レビューを送信', 'Submit Review');
-  String get loadReviews => tr('レビューを取得', 'Load Reviews');
+    String get submitReview => tr('レビューを投稿', 'Submit Review');
+    String get loadReviews => tr('みんなのレビューを見る', 'Load Reviews');
   String get reviewList => tr('レビュー一覧', 'Review List');
   String get noReviewsYet => tr('レビューはまだありません。', 'No reviews yet.');
   String reviewer(String reviewerId) =>
       tr('評価者: $reviewerId', 'Reviewer: $reviewerId');
   String countLabel(int count) => tr('件数: $count', 'Count: $count');
 
-  String selected(String title) => tr('選択: $title', 'Selected: $title');
+    String selected(String title) => tr('選択中: $title', 'Selected: $title');
 
   String get errorPrefix => tr('エラー', 'Error');
   String get errorNetwork =>
@@ -204,7 +204,7 @@ class AppStrings {
       tr('曲と評価者IDが必要です。', 'Song and reviewer ID are required.');
   String get reviewSubmitted => tr('レビューを送信しました。', 'Review submitted.');
   String get selectSongFirstForTeam =>
-      tr('先に曲を選択してください。', 'Select a song first.');
+      tr('曲が未選択です。ライブラリから1曲選んでください。', 'Select a song in Library first.');
   String get selectAtLeastOneTake =>
       tr('少なくとも1つ選択してください。', 'Select at least one take.');
 }

@@ -38,6 +38,7 @@ dependencies:
   record: ^6.1.1
   just_audio: ^0.10.5
   webview_flutter: ^4.13.0
+  google_fonts: ^6.3.2
 
 dev_dependencies:
   flutter_test:

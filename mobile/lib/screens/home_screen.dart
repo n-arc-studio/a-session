@@ -678,57 +678,67 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.only(
             left: 16,
             right: 16,
-            top: 8,
+            top: 10,
             bottom: MediaQuery.of(context).viewInsets.bottom + 20,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _apiBaseUrlController,
-                decoration: InputDecoration(
-                  labelText: _s.apiBaseUrl,
-                  border: OutlineInputBorder(),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _s.settings,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _minioBaseUrlController,
-                decoration: InputDecoration(
-                  labelText: _s.minioBaseUrl,
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 4),
+                Text(
+                  _s.tr('接続情報を確認し、API疎通をテストします。', 'Update endpoint settings and test API connectivity.'),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF5E6B78),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _scoreBucketController,
-                decoration: InputDecoration(
-                  labelText: _s.scoreBucket,
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _apiBaseUrlController,
+                  decoration: InputDecoration(labelText: _s.apiBaseUrl),
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _projectIdController,
-                decoration: InputDecoration(
-                  labelText: _s.projectId,
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _minioBaseUrlController,
+                  decoration: InputDecoration(labelText: _s.minioBaseUrl),
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _userIdController,
-                decoration: InputDecoration(
-                  labelText: _s.userId,
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _scoreBucketController,
+                  decoration: InputDecoration(labelText: _s.scoreBucket),
                 ),
-              ),
-              const SizedBox(height: 10),
-              FilledButton.tonal(
-                onPressed: _isBusy ? null : _healthCheck,
-                child: Text(_s.apiCheck),
-              ),
-            ],
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _projectIdController,
+                  decoration: InputDecoration(labelText: _s.projectId),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _userIdController,
+                  decoration: InputDecoration(labelText: _s.userId),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    FilledButton.tonal(
+                      onPressed: _isBusy ? null : _healthCheck,
+                      child: Text(_s.apiCheck),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(_s.tr('閉じる', 'Close')),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -745,60 +755,191 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.only(
             left: 16,
             right: 16,
-            top: 8,
+            top: 10,
             bottom: MediaQuery.of(context).viewInsets.bottom + 20,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _songTitleController,
-                decoration: InputDecoration(
-                  labelText: _s.songTitle,
-                  border: OutlineInputBorder(),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _s.newSong,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _songMidiKeyController,
-                decoration: InputDecoration(
-                  labelText: _s.midiKey,
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 4),
+                Text(
+                  _s.tr('曲情報を登録して、すぐ練習フローに追加します。', 'Register a new song and add it to your practice flow.'),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF5E6B78),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _songMusicXmlKeyController,
-                decoration: InputDecoration(
-                  labelText: _s.musicXmlKey,
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _songTitleController,
+                  decoration: InputDecoration(labelText: _s.songTitle),
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _songBpmController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: _s.bpm,
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _songMidiKeyController,
+                  decoration: InputDecoration(labelText: _s.midiKey),
                 ),
-              ),
-              const SizedBox(height: 10),
-              FilledButton(
-                onPressed: _isBusy
-                    ? null
-                    : () async {
-                        await _createSong();
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                        }
-                      },
-                child: Text(_s.createSong),
-              ),
-            ],
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _songMusicXmlKeyController,
+                  decoration: InputDecoration(labelText: _s.musicXmlKey),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _songBpmController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: _s.bpm),
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: _isBusy
+                      ? null
+                      : () async {
+                          await _createSong();
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                  child: Text(_s.createSong),
+                ),
+              ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  Color _transportStateColor() {
+    return switch (_transportState) {
+      SessionTransportState.playing => const Color(0xFF1B9C5A),
+      SessionTransportState.paused => const Color(0xFFD98E04),
+      SessionTransportState.stopped => const Color(0xFF5E6B78),
+    };
+  }
+
+  IconData _transportStateIcon() {
+    return switch (_transportState) {
+      SessionTransportState.playing => Icons.play_circle_fill,
+      SessionTransportState.paused => Icons.pause_circle,
+      SessionTransportState.stopped => Icons.stop_circle,
+    };
+  }
+
+  Widget _buildShell(Widget child) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1180),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    String? subtitle,
+    IconData? icon,
+    required Widget child,
+    List<Widget>? actions,
+  }) {
+    final titleStyle = Theme.of(context).textTheme.titleLarge;
+    final subtitleStyle = Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF5E6B78));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 22, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(child: Text(title, style: titleStyle)),
+                if (actions != null) ...actions,
+              ],
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(subtitle, style: subtitleStyle),
+            ],
+            const SizedBox(height: 12),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroBanner() {
+    final songLabel = _selectedSong == null
+        ? _s.selectSongFirst
+        : _s.currentSong(_selectedSong!.title);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F3D5E), Color(0xFF1E847F)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _s.practiceFlow,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            songLabel,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: const Color(0xFFE2EEF8),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFE67E22),
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () => _goToTab(1),
+                child: Text(_s.resumeSession),
+              ),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Color(0xFFB9D3E6)),
+                ),
+                onPressed: () => _goToTab(4),
+                child: Text(_s.openLibrary),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -806,7 +947,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_s.appTitle),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_s.appTitle),
+            Text(
+              _selectedSong == null
+                  ? _s.tr('曲を選んで開始', 'Pick a song to begin')
+                  : _selectedSong!.title,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: const Color(0xFF5E6B78),
+              ),
+            ),
+          ],
+        ),
         bottom: _isBusy
             ? const PreferredSize(
                 preferredSize: Size.fromHeight(3),
@@ -814,6 +968,11 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             : null,
         actions: [
+          IconButton(
+            onPressed: _isBusy ? null : _loadSongs,
+            icon: const Icon(Icons.sync_rounded),
+            tooltip: _s.refreshSongs,
+          ),
           IconButton(
             onPressed: _openConnectionSheet,
             icon: const Icon(Icons.tune),
@@ -836,15 +995,15 @@ class _HomeScreenState extends State<HomeScreen> {
         onDestinationSelected: (index) => setState(() => _tabIndex = index),
         destinations: [
           NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
+            icon: const Icon(Icons.dashboard_outlined),
             label: _s.home,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.piano),
+            icon: const Icon(Icons.multitrack_audio_outlined),
             label: _s.session,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.equalizer),
+            icon: const Icon(Icons.rate_review_outlined),
             label: _s.review,
           ),
           NavigationDestination(icon: const Icon(Icons.groups), label: _s.team),
@@ -882,122 +1041,107 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     };
 
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return _buildShell(
+      ListView(
         children: [
-          Text(
-            _s.practiceFlow,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            _selectedSong == null
-                ? _s.selectSongFirst
-                : _s.currentSong(_selectedSong!.title),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton(
-                    onPressed: () => _goToTab(1),
-                    child: Text(_s.resumeSession),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: () => _goToTab(4),
-                    child: Text(_s.openLibrary),
-                  ),
-                  OutlinedButton(
-                    onPressed: _isBusy ? null : _loadSongs,
-                    child: Text(_s.refreshSongs),
-                  ),
-                ],
-              ),
+          _buildHeroBanner(),
+          const SizedBox(height: 14),
+          _buildSectionCard(
+            title: _s.tr('クイックアクション', 'Quick Actions'),
+            subtitle: _s.tr('よく使う操作にすぐアクセスできます。', 'Jump right into your most common actions.'),
+            icon: Icons.rocket_launch_outlined,
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                FilledButton.tonal(
+                  onPressed: _isBusy ? null : _loadSongs,
+                  child: Text(_s.refreshSongs),
+                ),
+                OutlinedButton(
+                  onPressed: () => _goToTab(3),
+                  child: Text(_s.openTeam),
+                ),
+                OutlinedButton(
+                  onPressed: _openConnectionSheet,
+                  child: Text(_s.settings),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
-          SegmentedButton<UserRole>(
-            showSelectedIcon: false,
-            segments: [
-              ButtonSegment(value: UserRole.arranger, label: Text(_s.arranger)),
-              ButtonSegment(
-                value: UserRole.practitioner,
-                label: Text(_s.practitioner),
-              ),
-              ButtonSegment(
-                value: UserRole.evaluator,
-                label: Text(_s.evaluator),
-              ),
-            ],
-            selected: {_selectedRole},
-            onSelectionChanged: (value) => _selectRole(value.first),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          _buildSectionCard(
+            title: roleTitle,
+            subtitle: _s.tr('あなたの役割に合わせた次の3ステップ', 'Your next three steps for this role'),
+            icon: Icons.assignment_turned_in_outlined,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    Text(
-                      roleTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
+                    ChoiceChip(
+                      label: Text(_s.arranger),
+                      selected: _selectedRole == UserRole.arranger,
+                      onSelected: (_) => _selectRole(UserRole.arranger),
                     ),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: ListView(
-                        children: [
-                          for (var i = 0; i < roleSteps.length; i++)
-                            ListTile(
-                              leading: Icon(switch (i) {
-                                0 => Icons.looks_one_outlined,
-                                1 => Icons.looks_two_outlined,
-                                _ => Icons.looks_3_outlined,
-                              }),
-                              title: Text(roleSteps[i]),
-                            ),
-                        ],
-                      ),
+                    ChoiceChip(
+                      label: Text(_s.practitioner),
+                      selected: _selectedRole == UserRole.practitioner,
+                      onSelected: (_) => _selectRole(UserRole.practitioner),
                     ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        if (_selectedRole == UserRole.arranger)
-                          FilledButton(
-                            onPressed: () {
-                              _goToTab(4);
-                              _openCreateSongSheet();
-                            },
-                            child: Text(_s.arrangerPrimaryAction),
-                          ),
-                        if (_selectedRole == UserRole.practitioner)
-                          FilledButton(
-                            onPressed: () => _goToTab(1),
-                            child: Text(_s.practitionerPrimaryAction),
-                          ),
-                        if (_selectedRole == UserRole.evaluator)
-                          FilledButton(
-                            onPressed: () => _goToTab(2),
-                            child: Text(_s.evaluatorPrimaryAction),
-                          ),
-                        OutlinedButton(
-                          onPressed: () => _goToTab(3),
-                          child: Text(_s.openTeam),
-                        ),
-                      ],
+                    ChoiceChip(
+                      label: Text(_s.evaluator),
+                      selected: _selectedRole == UserRole.evaluator,
+                      onSelected: (_) => _selectRole(UserRole.evaluator),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 12),
+                for (var i = 0; i < roleSteps.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      tileColor: const Color(0xFFF8FBFF),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      leading: CircleAvatar(
+                        radius: 15,
+                        backgroundColor: const Color(0xFFDDEDF7),
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        child: Text('${i + 1}'),
+                      ),
+                      title: Text(roleSteps[i]),
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    if (_selectedRole == UserRole.arranger)
+                      FilledButton(
+                        onPressed: () {
+                          _goToTab(4);
+                          _openCreateSongSheet();
+                        },
+                        child: Text(_s.arrangerPrimaryAction),
+                      ),
+                    if (_selectedRole == UserRole.practitioner)
+                      FilledButton(
+                        onPressed: () => _goToTab(1),
+                        child: Text(_s.practitionerPrimaryAction),
+                      ),
+                    if (_selectedRole == UserRole.evaluator)
+                      FilledButton(
+                        onPressed: () => _goToTab(2),
+                        child: Text(_s.evaluatorPrimaryAction),
+                      ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -1006,418 +1150,357 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSessionTab() {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 980;
-
-          final header = Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField<Song>(
-                          initialValue: _selectedSong,
-                          decoration: InputDecoration(
-                            labelText: _s.teamSharedSong,
-                            border: const OutlineInputBorder(),
-                          ),
-                          items: _songs
-                              .map(
-                                (song) => DropdownMenuItem<Song>(
-                                  value: song,
-                                  child: Text(song.title),
-                                ),
-                              )
-                              .toList(growable: false),
-                          onChanged: (song) {
-                            setState(() {
-                              _selectedSong = song;
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.tonal(
-                        onPressed: _isBusy ? null : _loadSongs,
-                        child: Text(_s.refreshSongs),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _s.startPositionLabel(
-                                _startPositionSeconds.toStringAsFixed(1),
-                              ),
-                            ),
-                            Slider(
-                              min: 0,
-                              max: 120,
-                              value: _startPositionSeconds,
-                              onChanged: (v) =>
-                                  setState(() => _startPositionSeconds = v),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton(
-                        onPressed: _isBusy ? null : _playSessionTransport,
-                        child: Text(_s.play),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.tonal(
-                        onPressed: _isBusy ? null : _pauseSessionTransport,
-                        child: Text(_s.pause),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton(
-                        onPressed: _isBusy ? null : _stopSessionTransport,
-                        child: Text(_s.stop),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Chip(
-                      label: Text(_s.transportStateLabel(_transportState.name)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-
-          final staffPane = Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      DropdownButton<int>(
-                        value: _selectedStaffTrackId,
-                        items: _mixerTracks
+    return _buildShell(
+      ListView(
+        children: [
+          _buildSectionCard(
+            title: _s.tr('再生コントロール', 'Playback Control'),
+            subtitle: _s.tr('曲選択・再生位置・トランスポートをここで管理します。', 'Control song selection, seek, and playback transport.'),
+            icon: Icons.play_circle_outline,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<Song>(
+                        initialValue: _selectedSong,
+                        decoration: InputDecoration(labelText: _s.teamSharedSong),
+                        items: _songs
                             .map(
-                              (track) => DropdownMenuItem<int>(
-                                value: track.id,
-                                child: Text(track.label),
+                              (song) => DropdownMenuItem<Song>(
+                                value: song,
+                                child: Text(song.title),
                               ),
                             )
                             .toList(growable: false),
-                        onChanged: (value) {
-                          if (value == null) {
-                            return;
-                          }
+                        onChanged: (song) {
                           setState(() {
-                            _selectedStaffTrackId = value;
+                            _selectedSong = song;
                           });
                         },
                       ),
-                      SegmentedButton<bool>(
-                        showSelectedIcon: false,
-                        segments: [
-                          ButtonSegment(
-                            value: true,
-                            label: Text(_s.trebleClef),
-                          ),
-                          ButtonSegment(value: false, label: Text(_s.bassClef)),
-                        ],
-                        selected: {_showTrebleClef},
-                        onSelectionChanged: (value) {
-                          setState(() {
-                            _showTrebleClef = value.first;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                        ),
-                      ),
-                      child: CustomPaint(
-                        painter: _MidiStaffPainter(
-                          showTrebleClef: _showTrebleClef,
-                          seed: _selectedStaffTrackId,
-                        ),
-                        child: Center(
-                          child: Text(
-                            _s.midiStaffHint,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          );
-
-          final mixerPane = Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        _s.mixer,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const Spacer(),
-                      Text(_s.trackCountLabel(_sessionTrackCount)),
-                    ],
-                  ),
-                  Slider(
-                    min: 4,
-                    max: 8,
-                    divisions: 4,
-                    value: _sessionTrackCount.toDouble(),
-                    onChanged: (value) => _updateTrackCount(value.round()),
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      FilledButton.tonal(
-                        onPressed: _soloStaffTrack,
-                        child: Text(_s.soloSelected),
-                      ),
-                      OutlinedButton(
-                        onPressed: _resetMixer,
-                        child: Text(_s.resetMix),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _mixerTracks.length,
-                      itemBuilder: (context, index) {
-                        final track = _mixerTracks[index];
-                        return Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(track.label),
-                                Row(
-                                  children: [
-                                    Switch(
-                                      value: track.isOn,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          track.isOn = value;
-                                        });
-                                      },
-                                    ),
-                                    Text(_s.trackOnOff(track.isOn)),
-                                    const Spacer(),
-                                    FilterChip(
-                                      selected: track.permissionEnabled,
-                                      label: Text(_s.permission),
-                                      onSelected: (value) {
-                                        setState(() {
-                                          track.permissionEnabled = value;
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  _s.trackVolumeLabel(
-                                    (track.volume * 100).round(),
-                                  ),
-                                ),
-                                Slider(
-                                  min: 0,
-                                  max: 1,
-                                  value: track.volume,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      track.volume = value;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+                    const SizedBox(width: 10),
+                    FilledButton.tonal(
+                      onPressed: _isBusy ? null : _loadSongs,
+                      child: Text(_s.refreshSongs),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          );
-
-          final audioPane = Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: _isBusy ? null : _copySongScoreDownloadUrl,
-                        icon: const Icon(Icons.download),
-                        label: Text(_s.downloadScore),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: _isBusy ? null : _copySongMidiDownloadUrl,
-                        icon: const Icon(Icons.audio_file),
-                        label: Text(_s.downloadMidi),
-                      ),
-                      FilledButton.tonal(
-                        onPressed: _isBusy ? null : _loadTakes,
-                        child: Text(_s.loadTeamTakes),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _s.teammateTrackDownloads,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    height: 160,
-                    child: ListView.builder(
-                      itemCount: _takes.length,
-                      itemBuilder: (context, index) {
-                        final take = _takes[index];
-                        final selected = _selectedTakeIds.contains(take.id);
-                        return ListTile(
-                          dense: true,
-                          leading: Checkbox(
-                            value: selected,
-                            onChanged: (value) {
-                              setState(() {
-                                if (value == true) {
-                                  _selectedTakeIds.add(take.id);
-                                } else {
-                                  _selectedTakeIds.remove(take.id);
-                                }
-                              });
-                            },
-                          ),
-                          title: Text(
-                            _s.teammateTakeTitle(index + 1, take.userId),
-                          ),
-                          subtitle: Text(_s.offsetMs(take.offsetMs)),
-                          trailing: IconButton(
-                            onPressed: _isBusy
-                                ? null
-                                : () => _copyTakeDownloadUrl(take.id),
-                            icon: const Icon(Icons.download),
-                            tooltip: _s.downloadTake,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const Divider(),
-                  Text(
-                    _s.myRecording,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      FilledButton(
-                        onPressed: _isBusy || _isRecording
-                            ? null
-                            : _startRecording,
-                        child: Text(_s.record),
-                      ),
-                      FilledButton.tonal(
-                        onPressed: _isBusy || !_isRecording
-                            ? null
-                            : _stopRecording,
-                        child: Text(_s.stop),
-                      ),
-                      FilledButton.tonal(
-                        onPressed: _isBusy || _lastRecordPath == null
-                            ? null
-                            : _playLastRecording,
-                        child: Text(_s.play),
-                      ),
-                      OutlinedButton(
-                        onPressed: _isBusy || _lastRecordPath == null
-                            ? null
-                            : _uploadLastTake,
-                        child: Text(_s.upload),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(_s.recordingStatus(_isRecording)),
-                  Text(_s.durationMs(_recordStopwatch.elapsedMilliseconds)),
-                ],
-              ),
-            ),
-          );
-
-          if (isWide) {
-            return Column(
-              children: [
-                header,
+                  ],
+                ),
                 const SizedBox(height: 12),
-                Expanded(
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _s.startPositionLabel(_startPositionSeconds.toStringAsFixed(1)),
+                  ),
+                ),
+                Slider(
+                  min: 0,
+                  max: 120,
+                  value: _startPositionSeconds,
+                  onChanged: (v) => setState(() => _startPositionSeconds = v),
+                ),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    FilledButton(
+                      onPressed: _isBusy ? null : _playSessionTransport,
+                      child: Text(_s.play),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: _isBusy ? null : _pauseSessionTransport,
+                      child: Text(_s.pause),
+                    ),
+                    OutlinedButton(
+                      onPressed: _isBusy ? null : _stopSessionTransport,
+                      child: Text(_s.stop),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: _transportStateColor().withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(flex: 6, child: staffPane),
-                      const SizedBox(width: 12),
-                      Expanded(flex: 4, child: mixerPane),
+                      Icon(_transportStateIcon(), size: 18, color: _transportStateColor()),
+                      const SizedBox(width: 8),
+                      Text(
+                        _s.transportStateLabel(_transportState.name),
+                        style: TextStyle(
+                          color: _transportStateColor(),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                SizedBox(height: 340, child: audioPane),
               ],
-            );
-          }
-
-          return ListView(
-            children: [
-              header,
-              const SizedBox(height: 12),
-              SizedBox(height: 340, child: staffPane),
-              const SizedBox(height: 12),
-              SizedBox(height: 420, child: mixerPane),
-              const SizedBox(height: 12),
-              SizedBox(height: 420, child: audioPane),
-            ],
-          );
-        },
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildSectionCard(
+            title: _s.tr('譜面ビュー', 'Score View'),
+            subtitle: _s.midiStaffHint,
+            icon: Icons.music_note_outlined,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    DropdownButton<int>(
+                      value: _selectedStaffTrackId,
+                      items: _mixerTracks
+                          .map(
+                            (track) => DropdownMenuItem<int>(
+                              value: track.id,
+                              child: Text(track.label),
+                            ),
+                          )
+                          .toList(growable: false),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setState(() {
+                          _selectedStaffTrackId = value;
+                        });
+                      },
+                    ),
+                    SegmentedButton<bool>(
+                      showSelectedIcon: false,
+                      segments: [
+                        ButtonSegment(value: true, label: Text(_s.trebleClef)),
+                        ButtonSegment(value: false, label: Text(_s.bassClef)),
+                      ],
+                      selected: {_showTrebleClef},
+                      onSelectionChanged: (value) {
+                        setState(() {
+                          _showTrebleClef = value.first;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  height: 280,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFCFEFF),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFDCE3EC)),
+                  ),
+                  child: CustomPaint(
+                    painter: _MidiStaffPainter(
+                      showTrebleClef: _showTrebleClef,
+                      seed: _selectedStaffTrackId,
+                    ),
+                    child: Center(
+                      child: Text(_s.midiStaffHint, textAlign: TextAlign.center),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildSectionCard(
+            title: _s.mixer,
+            subtitle: _s.trackCountLabel(_sessionTrackCount),
+            icon: Icons.tune,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Slider(
+                  min: 4,
+                  max: 8,
+                  divisions: 4,
+                  value: _sessionTrackCount.toDouble(),
+                  onChanged: (value) => _updateTrackCount(value.round()),
+                ),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    FilledButton.tonal(
+                      onPressed: _soloStaffTrack,
+                      child: Text(_s.soloSelected),
+                    ),
+                    OutlinedButton(
+                      onPressed: _resetMixer,
+                      child: Text(_s.resetMix),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 320,
+                  child: ListView.builder(
+                    itemCount: _mixerTracks.length,
+                    itemBuilder: (context, index) {
+                      final track = _mixerTracks[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(track.label),
+                              Row(
+                                children: [
+                                  Switch(
+                                    value: track.isOn,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        track.isOn = value;
+                                      });
+                                    },
+                                  ),
+                                  Text(_s.trackOnOff(track.isOn)),
+                                  const Spacer(),
+                                  FilterChip(
+                                    selected: track.permissionEnabled,
+                                    label: Text(_s.permission),
+                                    onSelected: (value) {
+                                      setState(() {
+                                        track.permissionEnabled = value;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Text(_s.trackVolumeLabel((track.volume * 100).round())),
+                              Slider(
+                                min: 0,
+                                max: 1,
+                                value: track.volume,
+                                onChanged: (value) {
+                                  setState(() {
+                                    track.volume = value;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildSectionCard(
+            title: _s.tr('録音と共有', 'Recording and Sharing'),
+            subtitle: _s.tr('録音、アップロード、チーム音声確認をまとめて行えます。', 'Record, upload, and review team takes in one place.'),
+            icon: Icons.graphic_eq,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: _isBusy ? null : _copySongScoreDownloadUrl,
+                      icon: const Icon(Icons.download),
+                      label: Text(_s.downloadScore),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: _isBusy ? null : _copySongMidiDownloadUrl,
+                      icon: const Icon(Icons.audio_file),
+                      label: Text(_s.downloadMidi),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: _isBusy ? null : _loadTakes,
+                      child: Text(_s.loadTeamTakes),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  _s.teammateTrackDownloads,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                SizedBox(
+                  height: 160,
+                  child: ListView.builder(
+                    itemCount: _takes.length,
+                    itemBuilder: (context, index) {
+                      final take = _takes[index];
+                      final selected = _selectedTakeIds.contains(take.id);
+                      return ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: Checkbox(
+                          value: selected,
+                          onChanged: (value) {
+                            setState(() {
+                              if (value == true) {
+                                _selectedTakeIds.add(take.id);
+                              } else {
+                                _selectedTakeIds.remove(take.id);
+                              }
+                            });
+                          },
+                        ),
+                        title: Text(_s.teammateTakeTitle(index + 1, take.userId)),
+                        subtitle: Text(_s.offsetMs(take.offsetMs)),
+                        trailing: IconButton(
+                          onPressed: _isBusy ? null : () => _copyTakeDownloadUrl(take.id),
+                          icon: const Icon(Icons.download),
+                          tooltip: _s.downloadTake,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const Divider(height: 20),
+                Text(
+                  _s.myRecording,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    FilledButton(
+                      onPressed: _isBusy || _isRecording ? null : _startRecording,
+                      child: Text(_s.record),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: _isBusy || !_isRecording ? null : _stopRecording,
+                      child: Text(_s.stop),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: _isBusy || _lastRecordPath == null ? null : _playLastRecording,
+                      child: Text(_s.play),
+                    ),
+                    OutlinedButton(
+                      onPressed: _isBusy || _lastRecordPath == null ? null : _uploadLastTake,
+                      child: Text(_s.upload),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(_s.recordingStatus(_isRecording)),
+                Text(_s.durationMs(_recordStopwatch.elapsedMilliseconds)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1428,127 +1511,112 @@ class _HomeScreenState extends State<HomeScreen> {
       300,
     )).toDouble();
 
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: ListView(
+    return _buildShell(
+      ListView(
         children: [
-          Text(_s.takeReview, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(_s.lastTake(_lastRecordPath ?? '-')),
-                  Text(_s.durationMs(_recordStopwatch.elapsedMilliseconds)),
-                  const SizedBox(height: 10),
-                  Text(_s.offsetMs(offsetValue.round())),
-                  Slider(
-                    min: -300,
-                    max: 300,
-                    divisions: 60,
-                    value: offsetValue,
-                    onChanged: (value) {
-                      setState(() {
-                        _offsetMsController.text = value.round().toString();
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      FilledButton(
-                        onPressed: _isBusy || _lastRecordPath == null
-                            ? null
-                            : _uploadLastTake,
-                        child: Text(_s.saveAndShare),
+          _buildSectionCard(
+            title: _s.takeReview,
+            subtitle: _s.tr('録音タイミングを調整して、共有前に仕上げます。', 'Fine tune recording offset before sharing.'),
+            icon: Icons.waves_outlined,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(_s.lastTake(_lastRecordPath ?? '-')),
+                Text(_s.durationMs(_recordStopwatch.elapsedMilliseconds)),
+                const SizedBox(height: 10),
+                Text(_s.offsetMs(offsetValue.round())),
+                Slider(
+                  min: -300,
+                  max: 300,
+                  divisions: 60,
+                  value: offsetValue,
+                  onChanged: (value) {
+                    setState(() {
+                      _offsetMsController.text = value.round().toString();
+                    });
+                  },
+                ),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFFE67E22),
+                        foregroundColor: Colors.white,
                       ),
-                      FilledButton.tonal(
-                        onPressed: _isBusy || _isRecording
-                            ? null
-                            : _startRecording,
-                        child: Text(_s.rerecord),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                      onPressed:
+                          _isBusy || _lastRecordPath == null ? null : _uploadLastTake,
+                      child: Text(_s.saveAndShare),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: _isBusy || _isRecording ? null : _startRecording,
+                      child: Text(_s.rerecord),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
-          Text(
-            _s.thirdPartyReview,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(_s.ratingLabel(_reviewRating)),
-                  Slider(
-                    min: 1,
-                    max: 5,
-                    divisions: 4,
-                    value: _reviewRating.toDouble(),
-                    onChanged: (value) {
-                      setState(() {
-                        _reviewRating = value.round();
-                      });
-                    },
-                  ),
-                  TextField(
-                    controller: _reviewCommentController,
-                    minLines: 2,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      labelText: _s.reviewComment,
-                      border: const OutlineInputBorder(),
+          _buildSectionCard(
+            title: _s.thirdPartyReview,
+            subtitle: _s.tr('客観評価を追加して、改善ポイントを残します。', 'Add objective feedback and next improvements.'),
+            icon: Icons.feedback_outlined,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(_s.ratingLabel(_reviewRating)),
+                Slider(
+                  min: 1,
+                  max: 5,
+                  divisions: 4,
+                  value: _reviewRating.toDouble(),
+                  onChanged: (value) {
+                    setState(() {
+                      _reviewRating = value.round();
+                    });
+                  },
+                ),
+                TextField(
+                  controller: _reviewCommentController,
+                  minLines: 2,
+                  maxLines: 4,
+                  decoration: InputDecoration(labelText: _s.reviewComment),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    FilledButton(
+                      onPressed: _isBusy ? null : _submitReview,
+                      child: Text(_s.submitReview),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      FilledButton(
-                        onPressed: _isBusy ? null : _submitReview,
-                        child: Text(_s.submitReview),
-                      ),
-                      FilledButton.tonal(
-                        onPressed: _isBusy ? null : _loadReviews,
-                        child: Text(_s.loadReviews),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    FilledButton.tonal(
+                      onPressed: _isBusy ? null : _loadReviews,
+                      child: Text(_s.loadReviews),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Card(
+          const SizedBox(height: 12),
+          _buildSectionCard(
+            title: _s.reviewList,
+            subtitle: _s.countLabel(_reviews.length),
+            icon: Icons.list_alt_outlined,
             child: Column(
               children: [
-                ListTile(
-                  title: Text(_s.reviewList),
-                  trailing: Text(_s.countLabel(_reviews.length)),
-                ),
-                const Divider(height: 1),
                 if (_reviews.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(_s.noReviewsYet),
-                    ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(_s.noReviewsYet),
                   ),
                 for (final review in _reviews)
                   ListTile(
+                    contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.rate_review_outlined),
                     title: Text(_s.ratingLabel(review.rating)),
                     subtitle: Text(
@@ -1564,64 +1632,73 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTeamTab() {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return _buildShell(
+      ListView(
         children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              FilledButton.tonal(
-                onPressed: _isBusy ? null : _loadTakes,
-                child: Text(_s.loadTeamTakes),
-              ),
-              FilledButton(
-                onPressed: _isBusy ? null : _playSelectedTakes,
-                child: Text(_s.playSelectedTogether),
-              ),
-              OutlinedButton(
-                onPressed: _isBusy ? null : () => _runGuarded(_stopAllPlayers),
-                child: Text(_s.stop),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: Card(
-              child: ListView.builder(
-                itemCount: _takes.length,
-                itemBuilder: (context, index) {
-                  final take = _takes[index];
-                  final selected = _selectedTakeIds.contains(take.id);
-                  return ListTile(
-                    leading: Checkbox(
-                      value: selected,
-                      onChanged: (value) {
-                        setState(() {
-                          if (value == true) {
-                            _selectedTakeIds.add(take.id);
-                          } else {
-                            _selectedTakeIds.remove(take.id);
-                          }
-                        });
-                      },
+          _buildSectionCard(
+            title: _s.team,
+            subtitle: _s.tr('複数テイクを比較しながら、チーム全体の完成度を上げます。', 'Compare multiple takes to improve team performance.'),
+            icon: Icons.groups,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    FilledButton.tonal(
+                      onPressed: _isBusy ? null : _loadTakes,
+                      child: Text(_s.loadTeamTakes),
                     ),
-                    title: Text('${_s.tr('ユーザー', 'User')}: ${take.userId}'),
-                    subtitle: Text(
-                      '${_s.tr('テイク', 'Take')}: ${take.id}\n${_s.offsetMs(take.offsetMs)}',
+                    FilledButton(
+                      onPressed: _isBusy ? null : _playSelectedTakes,
+                      child: Text(_s.playSelectedTogether),
                     ),
-                    trailing: IconButton(
-                      onPressed: _isBusy
-                          ? null
-                          : () => _copyTakeDownloadUrl(take.id),
-                      icon: const Icon(Icons.download),
-                      tooltip: _s.downloadTake,
+                    OutlinedButton(
+                      onPressed: _isBusy ? null : () => _runGuarded(_stopAllPlayers),
+                      child: Text(_s.stop),
                     ),
-                  );
-                },
-              ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 460,
+                  child: ListView.builder(
+                    itemCount: _takes.length,
+                    itemBuilder: (context, index) {
+                      final take = _takes[index];
+                      final selected = _selectedTakeIds.contains(take.id);
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: Checkbox(
+                            value: selected,
+                            onChanged: (value) {
+                              setState(() {
+                                if (value == true) {
+                                  _selectedTakeIds.add(take.id);
+                                } else {
+                                  _selectedTakeIds.remove(take.id);
+                                }
+                              });
+                            },
+                          ),
+                          title: Text('${_s.tr('ユーザー', 'User')}: ${take.userId}'),
+                          subtitle: Text(
+                            '${_s.tr('テイク', 'Take')}: ${take.id}\n${_s.offsetMs(take.offsetMs)}',
+                          ),
+                          trailing: IconButton(
+                            onPressed:
+                                _isBusy ? null : () => _copyTakeDownloadUrl(take.id),
+                            icon: const Icon(Icons.download),
+                            tooltip: _s.downloadTake,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -1647,73 +1724,85 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildLibraryTab() {
     final songs = _filteredSongs;
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
+    return _buildShell(
+      ListView(
         children: [
-          Row(
-            children: [
-              FilledButton.tonal(
-                onPressed: _isBusy ? null : _loadSongs,
-                child: Text(_s.loadSongs),
-              ),
-              const SizedBox(width: 8),
-              FilledButton(
-                onPressed: _openCreateSongSheet,
-                child: Text(_s.newSong),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _songSearchController,
-            decoration: InputDecoration(
-              hintText: _s.searchSongs,
-              prefixIcon: const Icon(Icons.search_outlined),
-              suffixIcon: _songSearchQuery.isEmpty
-                  ? null
-                  : IconButton(
-                      icon: const Icon(Icons.clear_outlined),
-                      onPressed: () {
-                        _songSearchController.clear();
-                        _onSongSearchChanged('');
-                      },
+          _buildSectionCard(
+            title: _s.library,
+            subtitle: _s.tr('曲の管理と選択はここで行います。', 'Manage and select songs here.'),
+            icon: Icons.library_music_outlined,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    FilledButton.tonal(
+                      onPressed: _isBusy ? null : _loadSongs,
+                      child: Text(_s.loadSongs),
                     ),
-              border: const OutlineInputBorder(),
-            ),
-            onChanged: _onSongSearchChanged,
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: Card(
-              child: songs.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Text(_s.noSongsMatch),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: songs.length,
-                      itemBuilder: (context, index) {
-                        final song = songs[index];
-                        final isSelected = _selectedSong?.id == song.id;
-                        return ListTile(
-                          selected: isSelected,
-                          onTap: () {
-                            setState(() {
-                              _selectedSong = song;
-                            });
-                            _showMessage(_s.selected(song.title));
+                    const SizedBox(width: 10),
+                    FilledButton(
+                      onPressed: _openCreateSongSheet,
+                      child: Text(_s.newSong),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _songSearchController,
+                  decoration: InputDecoration(
+                    hintText: _s.searchSongs,
+                    prefixIcon: const Icon(Icons.search_outlined),
+                    suffixIcon: _songSearchQuery.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: const Icon(Icons.clear_outlined),
+                            onPressed: () {
+                              _songSearchController.clear();
+                              _onSongSearchChanged('');
+                            },
+                          ),
+                  ),
+                  onChanged: _onSongSearchChanged,
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 520,
+                  child: songs.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Text(_s.noSongsMatch),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: songs.length,
+                          itemBuilder: (context, index) {
+                            final song = songs[index];
+                            final isSelected = _selectedSong?.id == song.id;
+                            return Card(
+                              color: isSelected
+                                  ? const Color(0xFFEDF6FE)
+                                  : Theme.of(context).cardTheme.color,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: ListTile(
+                                selected: isSelected,
+                                onTap: () {
+                                  setState(() {
+                                    _selectedSong = song;
+                                  });
+                                  _showMessage(_s.selected(song.title));
+                                },
+                                title: Text(song.title),
+                                subtitle: Text(song.id),
+                                trailing: song.musicxmlObjectKey == null
+                                    ? const Icon(Icons.music_note_outlined)
+                                    : const Icon(Icons.menu_book),
+                              ),
+                            );
                           },
-                          title: Text(song.title),
-                          subtitle: Text(song.id),
-                          trailing: song.musicxmlObjectKey == null
-                              ? const Icon(Icons.music_note_outlined)
-                              : const Icon(Icons.menu_book),
-                        );
-                      },
-                    ),
+                        ),
+                ),
+              ],
             ),
           ),
         ],
