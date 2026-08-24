@@ -13,6 +13,7 @@ This repository contains a FastAPI backend and a Flutter mobile client for the M
 
 ```text
 .
+|- docs/                Project documentation and implementation plans
 |- app/                 FastAPI application
 |- sql/                 DB initialization scripts
 |- mobile/              Flutter mobile client
@@ -201,6 +202,8 @@ flutter test test/widget_test.dart
 
 - Mobile details: `mobile/README.md`
 - UX architecture: `mobile/docs/ux-architecture.md`
+- MVP UI/UX plan: `docs/mvp-uiux-plan.md`
+- MVP deferred log: `docs/mvp-deferred-log.md`
 
 ## License
 

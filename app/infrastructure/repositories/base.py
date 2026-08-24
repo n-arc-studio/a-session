@@ -9,7 +9,14 @@ class SongRepository(ABC):
         pass
 
     @abstractmethod
-    def list_by_project(self, project_id: str) -> list[dict]:
+    def list_by_project(
+        self,
+        project_id: str,
+        limit: int | None = None,
+        offset: int = 0,
+        sort_by: str | None = None,
+        sort_order: str = "ASC",
+    ) -> list[dict]:
         pass
 
     @abstractmethod

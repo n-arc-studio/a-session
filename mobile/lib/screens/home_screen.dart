@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
@@ -42,20 +43,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _apiBaseUrlController =
-      TextEditingController(text: 'http://10.0.2.2:8000');
-  final TextEditingController _minioBaseUrlController =
-      TextEditingController(text: 'http://10.0.2.2:9000');
-  final TextEditingController _scoreBucketController =
-      TextEditingController(text: 'a-session-score');
+  final TextEditingController _apiBaseUrlController = TextEditingController(
+    text: 'http://10.0.2.2:8000',
+  );
+  final TextEditingController _minioBaseUrlController = TextEditingController(
+    text: 'http://10.0.2.2:9000',
+  );
+  final TextEditingController _scoreBucketController = TextEditingController(
+    text: 'a-session-score',
+  );
   final TextEditingController _projectIdController = TextEditingController();
   final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _songTitleController = TextEditingController();
   final TextEditingController _songMidiKeyController = TextEditingController();
-  final TextEditingController _songMusicXmlKeyController = TextEditingController();
+  final TextEditingController _songMusicXmlKeyController =
+      TextEditingController();
   final TextEditingController _songBpmController = TextEditingController();
-  final TextEditingController _offsetMsController = TextEditingController(text: '0');
-  final TextEditingController _reviewCommentController = TextEditingController();
+  final TextEditingController _offsetMsController = TextEditingController(
+    text: '0',
+  );
+  final TextEditingController _reviewCommentController =
+      TextEditingController();
+  final TextEditingController _songSearchController = TextEditingController();
 
   late ApiService _api;
   final RecorderService _recorder = RecorderService();
@@ -82,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _didInitMixer = false;
   bool _isBusy = false;
   bool _isRecording = false;
+  String _songSearchQuery = '';
 
   AppStrings get _s => AppStrings.of(context);
 
@@ -114,6 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _songBpmController.dispose();
     _offsetMsController.dispose();
     _reviewCommentController.dispose();
+    _songSearchController.dispose();
     for (final player in _players) {
       player.dispose();
     }
@@ -121,7 +132,10 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> _runGuarded(Future<void> Function() action) async {
+  Future<void> _runGuarded(
+    Future<void> Function() action, {
+    void Function(Object error)? onError,
+  }) async {
     if (_isBusy) {
       return;
     }
@@ -134,7 +148,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _api.updateBaseUrl(_apiBaseUrlController.text.trim());
       await action();
     } catch (error) {
-      _showMessage('${_s.errorPrefix}: $error');
+      if (onError != null) {
+        onError(error);
+      } else {
+        _showMessage('${_s.errorPrefix}: ${_toUserMessage(error)}');
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -142,6 +160,51 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     }
+  }
+
+  String _toUserMessage(Object error) {
+    if (error is DioException) {
+      switch (error.type) {
+        case DioExceptionType.connectionTimeout:
+        case DioExceptionType.sendTimeout:
+        case DioExceptionType.receiveTimeout:
+          return _s.errorTimeout;
+        case DioExceptionType.connectionError:
+          return _s.errorNetwork;
+        case DioExceptionType.badResponse:
+          final statusCode = error.response?.statusCode;
+          if (statusCode == 400) {
+            return _s.errorRequest;
+          }
+          if (statusCode == 401 || statusCode == 403) {
+            return _s.errorUnauthorized;
+          }
+          if (statusCode == 404) {
+            return _s.errorNotFound;
+          }
+          if (statusCode != null && statusCode >= 500) {
+            return _s.errorServer;
+          }
+          return _s.errorUnknown;
+        case DioExceptionType.cancel:
+        case DioExceptionType.badCertificate:
+        case DioExceptionType.unknown:
+          if (error.error is SocketException) {
+            return _s.errorNetwork;
+          }
+          return _s.errorUnknown;
+      }
+    }
+
+    if (error is SocketException) {
+      return _s.errorNetwork;
+    }
+
+    if (error is FileSystemException) {
+      return _s.fileNotFound(error.path ?? '-');
+    }
+
+    return _s.errorUnknown;
   }
 
   Future<void> _healthCheck() async {
@@ -163,8 +226,9 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _songs = songs;
         if (_selectedSong != null) {
-          final existing =
-              songs.where((song) => song.id == _selectedSong!.id).toList();
+          final existing = songs
+              .where((song) => song.id == _selectedSong!.id)
+              .toList();
           _selectedSong = existing.isEmpty ? null : existing.first;
         }
       });
@@ -278,7 +342,26 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       _showMessage(_s.takeUploaded);
-    });
+    }, onError: (error) => _showUploadRetry(error));
+  }
+
+  void _showUploadRetry(Object error) {
+    if (!mounted) {
+      return;
+    }
+    final detail = _toUserMessage(error);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${_s.errorPrefix}: $detail'),
+        action: SnackBarAction(
+          label: _s.retry,
+          onPressed: () {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            _uploadLastTake();
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _loadTakes() async {
@@ -300,8 +383,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _playSelectedTakes() async {
-    final selected =
-        _takes.where((take) => _selectedTakeIds.contains(take.id)).toList();
+    final selected = _takes
+        .where((take) => _selectedTakeIds.contains(take.id))
+        .toList();
     if (selected.isEmpty) {
       _showMessage(_s.selectAtLeastOneTake);
       return;
@@ -323,7 +407,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  List<MixerTrack> _buildMixerTracks(int trackCount, {List<MixerTrack>? previous}) {
+  List<MixerTrack> _buildMixerTracks(
+    int trackCount, {
+    List<MixerTrack>? previous,
+  }) {
     final safeCount = trackCount.clamp(4, 8);
     final result = <MixerTrack>[];
 
@@ -376,7 +463,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _updateTrackCount(int nextCount) {
     setState(() {
       _sessionTrackCount = nextCount.clamp(4, 8);
-      _mixerTracks = _buildMixerTracks(_sessionTrackCount, previous: _mixerTracks);
+      _mixerTracks = _buildMixerTracks(
+        _sessionTrackCount,
+        previous: _mixerTracks,
+      );
       if (!_mixerTracks.any((track) => track.id == _selectedStaffTrackId)) {
         _selectedStaffTrackId = _mixerTracks.first.id;
       }
@@ -384,7 +474,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _playSessionTransport() async {
-    final selectableTakes = _takes.where((take) => _selectedTakeIds.contains(take.id)).toList();
+    final selectableTakes = _takes
+        .where((take) => _selectedTakeIds.contains(take.id))
+        .toList();
     if (selectableTakes.isEmpty) {
       _showMessage(_s.selectAtLeastOneTake);
       return;
@@ -407,7 +499,9 @@ class _HomeScreenState extends State<HomeScreen> {
           await player.setUrl(url);
           await player.setVolume(track.volume);
           if (_startPositionSeconds > 0) {
-            await player.seek(Duration(milliseconds: (_startPositionSeconds * 1000).round()));
+            await player.seek(
+              Duration(milliseconds: (_startPositionSeconds * 1000).round()),
+            );
           }
           _players.add(player);
         }
@@ -569,7 +663,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _openConnectionSheet() {
@@ -711,6 +807,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_s.appTitle),
+        bottom: _isBusy
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(3),
+                child: LinearProgressIndicator(minHeight: 3),
+              )
+            : null,
         actions: [
           IconButton(
             onPressed: _openConnectionSheet,
@@ -745,10 +847,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.equalizer),
             label: _s.review,
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.groups),
-            label: _s.team,
-          ),
+          NavigationDestination(icon: const Icon(Icons.groups), label: _s.team),
           NavigationDestination(
             icon: const Icon(Icons.library_music),
             label: _s.library,
@@ -766,13 +865,21 @@ class _HomeScreenState extends State<HomeScreen> {
     };
 
     final roleSteps = switch (_selectedRole) {
-      UserRole.arranger => [_s.arrangerStep1, _s.arrangerStep2, _s.arrangerStep3],
+      UserRole.arranger => [
+        _s.arrangerStep1,
+        _s.arrangerStep2,
+        _s.arrangerStep3,
+      ],
       UserRole.practitioner => [
         _s.practitionerStep1,
         _s.practitionerStep2,
         _s.practitionerStep3,
       ],
-      UserRole.evaluator => [_s.evaluatorStep1, _s.evaluatorStep2, _s.evaluatorStep3],
+      UserRole.evaluator => [
+        _s.evaluatorStep1,
+        _s.evaluatorStep2,
+        _s.evaluatorStep3,
+      ],
     };
 
     return Padding(
@@ -780,7 +887,10 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(_s.practiceFlow, style: Theme.of(context).textTheme.headlineSmall),
+          Text(
+            _s.practiceFlow,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
           const SizedBox(height: 6),
           Text(
             _selectedSong == null
@@ -795,8 +905,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  FilledButton(onPressed: () => _goToTab(1), child: Text(_s.resumeSession)),
-                  FilledButton.tonal(onPressed: () => _goToTab(4), child: Text(_s.openLibrary)),
+                  FilledButton(
+                    onPressed: () => _goToTab(1),
+                    child: Text(_s.resumeSession),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: () => _goToTab(4),
+                    child: Text(_s.openLibrary),
+                  ),
                   OutlinedButton(
                     onPressed: _isBusy ? null : _loadSongs,
                     child: Text(_s.refreshSongs),
@@ -810,8 +926,14 @@ class _HomeScreenState extends State<HomeScreen> {
             showSelectedIcon: false,
             segments: [
               ButtonSegment(value: UserRole.arranger, label: Text(_s.arranger)),
-              ButtonSegment(value: UserRole.practitioner, label: Text(_s.practitioner)),
-              ButtonSegment(value: UserRole.evaluator, label: Text(_s.evaluator)),
+              ButtonSegment(
+                value: UserRole.practitioner,
+                label: Text(_s.practitioner),
+              ),
+              ButtonSegment(
+                value: UserRole.evaluator,
+                label: Text(_s.evaluator),
+              ),
             ],
             selected: {_selectedRole},
             onSelectionChanged: (value) => _selectRole(value.first),
@@ -824,20 +946,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(roleTitle, style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      roleTitle,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 8),
                     Expanded(
                       child: ListView(
                         children: [
                           for (var i = 0; i < roleSteps.length; i++)
                             ListTile(
-                              leading: Icon(
-                                switch (i) {
-                                  0 => Icons.looks_one_outlined,
-                                  1 => Icons.looks_two_outlined,
-                                  _ => Icons.looks_3_outlined,
-                                },
-                              ),
+                              leading: Icon(switch (i) {
+                                0 => Icons.looks_one_outlined,
+                                1 => Icons.looks_two_outlined,
+                                _ => Icons.looks_3_outlined,
+                              }),
                               title: Text(roleSteps[i]),
                             ),
                         ],
@@ -932,12 +1055,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(_s.startPositionLabel(_startPositionSeconds.toStringAsFixed(1))),
+                            Text(
+                              _s.startPositionLabel(
+                                _startPositionSeconds.toStringAsFixed(1),
+                              ),
+                            ),
                             Slider(
                               min: 0,
                               max: 120,
                               value: _startPositionSeconds,
-                              onChanged: (v) => setState(() => _startPositionSeconds = v),
+                              onChanged: (v) =>
+                                  setState(() => _startPositionSeconds = v),
                             ),
                           ],
                         ),
@@ -962,7 +1090,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 6),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Chip(label: Text(_s.transportStateLabel(_transportState.name))),
+                    child: Chip(
+                      label: Text(_s.transportStateLabel(_transportState.name)),
+                    ),
                   ),
                 ],
               ),
@@ -1001,7 +1131,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       SegmentedButton<bool>(
                         showSelectedIcon: false,
                         segments: [
-                          ButtonSegment(value: true, label: Text(_s.trebleClef)),
+                          ButtonSegment(
+                            value: true,
+                            label: Text(_s.trebleClef),
+                          ),
                           ButtonSegment(value: false, label: Text(_s.bassClef)),
                         ],
                         selected: {_showTrebleClef},
@@ -1019,7 +1152,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
                       ),
                       child: CustomPaint(
                         painter: _MidiStaffPainter(
@@ -1048,7 +1183,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Row(
                     children: [
-                      Text(_s.mixer, style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        _s.mixer,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                       const Spacer(),
                       Text(_s.trackCountLabel(_sessionTrackCount)),
                     ],
@@ -1109,7 +1247,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ],
                                 ),
-                                Text(_s.trackVolumeLabel((track.volume * 100).round())),
+                                Text(
+                                  _s.trackVolumeLabel(
+                                    (track.volume * 100).round(),
+                                  ),
+                                ),
                                 Slider(
                                   min: 0,
                                   max: 1,
@@ -1159,7 +1301,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(_s.teammateTrackDownloads, style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    _s.teammateTrackDownloads,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 6),
                   SizedBox(
                     height: 160,
@@ -1182,10 +1327,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               });
                             },
                           ),
-                          title: Text(_s.teammateTakeTitle(index + 1, take.userId)),
+                          title: Text(
+                            _s.teammateTakeTitle(index + 1, take.userId),
+                          ),
                           subtitle: Text(_s.offsetMs(take.offsetMs)),
                           trailing: IconButton(
-                            onPressed: _isBusy ? null : () => _copyTakeDownloadUrl(take.id),
+                            onPressed: _isBusy
+                                ? null
+                                : () => _copyTakeDownloadUrl(take.id),
                             icon: const Icon(Icons.download),
                             tooltip: _s.downloadTake,
                           ),
@@ -1194,18 +1343,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const Divider(),
-                  Text(_s.myRecording, style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    _s.myRecording,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 6),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
                       FilledButton(
-                        onPressed: _isBusy || _isRecording ? null : _startRecording,
+                        onPressed: _isBusy || _isRecording
+                            ? null
+                            : _startRecording,
                         child: Text(_s.record),
                       ),
                       FilledButton.tonal(
-                        onPressed: _isBusy || !_isRecording ? null : _stopRecording,
+                        onPressed: _isBusy || !_isRecording
+                            ? null
+                            : _stopRecording,
                         child: Text(_s.stop),
                       ),
                       FilledButton.tonal(
@@ -1267,9 +1423,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildReviewTab() {
-    final offsetValue = ((double.tryParse(_offsetMsController.text) ?? 0)
-        .clamp(-300, 300))
-      .toDouble();
+    final offsetValue = ((double.tryParse(_offsetMsController.text) ?? 0).clamp(
+      -300,
+      300,
+    )).toDouble();
 
     return Padding(
       padding: const EdgeInsets.all(12),
@@ -1304,12 +1461,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     runSpacing: 8,
                     children: [
                       FilledButton(
-                        onPressed:
-                            _isBusy || _lastRecordPath == null ? null : _uploadLastTake,
+                        onPressed: _isBusy || _lastRecordPath == null
+                            ? null
+                            : _uploadLastTake,
                         child: Text(_s.saveAndShare),
                       ),
                       FilledButton.tonal(
-                        onPressed: _isBusy || _isRecording ? null : _startRecording,
+                        onPressed: _isBusy || _isRecording
+                            ? null
+                            : _startRecording,
                         child: Text(_s.rerecord),
                       ),
                     ],
@@ -1319,7 +1479,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          Text(_s.thirdPartyReview, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            _s.thirdPartyReview,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
           Card(
             child: Padding(
@@ -1446,9 +1609,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                     title: Text('${_s.tr('ユーザー', 'User')}: ${take.userId}'),
-                    subtitle: Text('${_s.tr('テイク', 'Take')}: ${take.id}\n${_s.offsetMs(take.offsetMs)}'),
+                    subtitle: Text(
+                      '${_s.tr('テイク', 'Take')}: ${take.id}\n${_s.offsetMs(take.offsetMs)}',
+                    ),
                     trailing: IconButton(
-                      onPressed: _isBusy ? null : () => _copyTakeDownloadUrl(take.id),
+                      onPressed: _isBusy
+                          ? null
+                          : () => _copyTakeDownloadUrl(take.id),
                       icon: const Icon(Icons.download),
                       tooltip: _s.downloadTake,
                     ),
@@ -1462,7 +1629,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  List<Song> get _filteredSongs {
+    if (_songSearchQuery.isEmpty) {
+      return _songs;
+    }
+    final query = _songSearchQuery.toLowerCase();
+    return _songs
+        .where((song) => song.title.toLowerCase().contains(query))
+        .toList(growable: false);
+  }
+
+  void _onSongSearchChanged(String value) {
+    setState(() {
+      _songSearchQuery = value.trim();
+    });
+  }
+
   Widget _buildLibraryTab() {
+    final songs = _filteredSongs;
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -1481,29 +1665,55 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 12),
+          TextField(
+            controller: _songSearchController,
+            decoration: InputDecoration(
+              hintText: _s.searchSongs,
+              prefixIcon: const Icon(Icons.search_outlined),
+              suffixIcon: _songSearchQuery.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const Icon(Icons.clear_outlined),
+                      onPressed: () {
+                        _songSearchController.clear();
+                        _onSongSearchChanged('');
+                      },
+                    ),
+              border: const OutlineInputBorder(),
+            ),
+            onChanged: _onSongSearchChanged,
+          ),
+          const SizedBox(height: 12),
           Expanded(
             child: Card(
-              child: ListView.builder(
-                itemCount: _songs.length,
-                itemBuilder: (context, index) {
-                  final song = _songs[index];
-                  final isSelected = _selectedSong?.id == song.id;
-                  return ListTile(
-                    selected: isSelected,
-                    onTap: () {
-                      setState(() {
-                        _selectedSong = song;
-                      });
-                      _showMessage(_s.selected(song.title));
-                    },
-                    title: Text(song.title),
-                    subtitle: Text(song.id),
-                    trailing: song.musicxmlObjectKey == null
-                        ? const Icon(Icons.music_note_outlined)
-                        : const Icon(Icons.menu_book),
-                  );
-                },
-              ),
+              child: songs.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(_s.noSongsMatch),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: songs.length,
+                      itemBuilder: (context, index) {
+                        final song = songs[index];
+                        final isSelected = _selectedSong?.id == song.id;
+                        return ListTile(
+                          selected: isSelected,
+                          onTap: () {
+                            setState(() {
+                              _selectedSong = song;
+                            });
+                            _showMessage(_s.selected(song.title));
+                          },
+                          title: Text(song.title),
+                          subtitle: Text(song.id),
+                          trailing: song.musicxmlObjectKey == null
+                              ? const Icon(Icons.music_note_outlined)
+                              : const Icon(Icons.menu_book),
+                        );
+                      },
+                    ),
             ),
           ),
         ],
@@ -1562,6 +1772,7 @@ class _MidiStaffPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _MidiStaffPainter oldDelegate) {
-    return oldDelegate.showTrebleClef != showTrebleClef || oldDelegate.seed != seed;
+    return oldDelegate.showTrebleClef != showTrebleClef ||
+        oldDelegate.seed != seed;
   }
 }

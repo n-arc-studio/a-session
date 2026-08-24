@@ -1,6 +1,15 @@
 import uuid
+from typing import Literal
+
 from app.db import get_connection
 from app.infrastructure.repositories.base import SongRepository, TakeRepository, ReviewRepository
+
+# 並び替え方向の型定義（FastAPIのpatternと整合）
+SortOrder = Literal["ASC", "DESC"]
+
+# 許可される並び替え対象カラム（SQLインジェクション防止のため白リスト方式）
+_ALLOWED_SORT_COLUMNS = {"created_at", "title"}
+_DEFAULT_SORT_COLUMN = "created_at"
 
 
 class PostgresSongRepository(SongRepository):
@@ -24,16 +33,38 @@ class PostgresSongRepository(SongRepository):
             "bpm": bpm,
         }
 
-    def list_by_project(self, project_id: str) -> list[dict]:
-        query = """
+    def list_by_project(
+        self,
+        project_id: str,
+        limit: int | None = None,
+        offset: int = 0,
+        sort_by: str | None = None,
+        sort_order: SortOrder = "ASC",
+    ) -> list[dict]:
+        # 並び替えカラムは白リストで正規化（インジェクション防止）
+        column = (sort_by or _DEFAULT_SORT_COLUMN).lower()
+        if column not in _ALLOWED_SORT_COLUMNS:
+            column = _DEFAULT_SORT_COLUMN
+
+        query = f"""
             SELECT id, project_id, title, midi_object_key, musicxml_object_key, bpm
             FROM songs
             WHERE project_id = %s
-            ORDER BY created_at ASC
+            ORDER BY {column} {sort_order}
         """
+        params: list[object] = [project_id]
+
+        # ページング（limit=None は全件取得＝既存クライアントとの後方互換）
+        if limit is not None:
+            query += " LIMIT %s"
+            params.append(limit)
+        if offset and offset > 0:
+            query += " OFFSET %s"
+            params.append(offset)
+
         with get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute(query, (project_id,))
+                cur.execute(query, tuple(params))
                 return cur.fetchall()
 
     def get_midi_object_key(self, song_id: str) -> str | None:

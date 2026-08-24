@@ -13,8 +13,21 @@ class SongServiceImpl:
     def create_song(self, project_id: str, title: str, midi_object_key: str, musicxml_object_key: str | None, bpm: int | None, created_by: str | None) -> dict:
         return self._repo.create(project_id, title, midi_object_key, musicxml_object_key, bpm, created_by)
 
-    def list_songs(self, project_id: str) -> list[dict]:
-        return self._repo.list_by_project(project_id)
+    def list_songs(
+        self,
+        project_id: str,
+        limit: int | None = None,
+        offset: int = 0,
+        sort_by: str | None = None,
+        sort_order: str = "ASC",
+    ) -> list[dict]:
+        return self._repo.list_by_project(
+            project_id=project_id,
+            limit=limit,
+            offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order,
+        )
 
     def get_midi_download_url(self, song_id: str, expires: int = 900) -> tuple[str, int]:
         object_key = self._repo.get_midi_object_key(song_id)

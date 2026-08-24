@@ -24,9 +24,27 @@ def create_song(req: CreateSongRequest) -> SongOut:
     return SongOut(**result)
 
 
+# 許可される並び替え対象カラムと既定値（SQLインジェクション防止のため白リスト方式）
+_ALLOWED_SORT_COLUMNS = {"created_at", "title"}
+_DEFAULT_SORT_COLUMN = "created_at"
+_DEFAULT_SORT_DIRECTION = "ASC"
+
+
 @router.get("/songs", response_model=list[SongOut])
-def list_songs(project_id: str = Query(...)) -> list[SongOut]:
-    results = song_service.list_songs(project_id=project_id)
+def list_songs(
+    project_id: str = Query(...),
+    limit: int | None = Query(None, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    sort_by: str | None = Query(None, min_length=1, max_length=64),
+    sort_order: str = Query("ASC", pattern="^(?i)asc|desc$"),
+) -> list[SongOut]:
+    results = song_service.list_songs(
+        project_id=project_id,
+        limit=limit,
+        offset=offset,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
     return [SongOut(**row) for row in results]
 
 

@@ -27,7 +27,15 @@ class PresignedUpload {
 }
 
 class ApiService {
-  ApiService({required this.baseUrl}) : _dio = Dio(BaseOptions(baseUrl: baseUrl));
+  ApiService({required this.baseUrl})
+    : _dio = Dio(
+        BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 15),
+          sendTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      );
 
   final Dio _dio;
   String baseUrl;
@@ -42,7 +50,10 @@ class ApiService {
   }
 
   Future<List<Song>> listSongs(String projectId) async {
-    final response = await _dio.get('/songs', queryParameters: {'project_id': projectId});
+    final response = await _dio.get(
+      '/songs',
+      queryParameters: {'project_id': projectId},
+    );
     final data = response.data as List<dynamic>;
     return data
         .map((item) => Song.fromJson(item as Map<String, dynamic>))
@@ -94,7 +105,13 @@ class ApiService {
     required String filePath,
     required String contentType,
   }) async {
-    final uploadDio = Dio();
+    final uploadDio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 15),
+        sendTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
+    );
     final file = File(filePath);
     final bytes = await file.readAsBytes();
 
@@ -102,10 +119,7 @@ class ApiService {
       uploadUrl,
       data: Stream.fromIterable([bytes]),
       options: Options(
-        headers: {
-          'Content-Type': contentType,
-          'Content-Length': bytes.length,
-        },
+        headers: {'Content-Type': contentType, 'Content-Length': bytes.length},
       ),
     );
   }
@@ -133,7 +147,10 @@ class ApiService {
   }
 
   Future<List<Take>> listTakes(String songId) async {
-    final response = await _dio.get('/takes', queryParameters: {'song_id': songId});
+    final response = await _dio.get(
+      '/takes',
+      queryParameters: {'song_id': songId},
+    );
     final data = response.data as List<dynamic>;
     return data
         .map((item) => Take.fromJson(item as Map<String, dynamic>))
@@ -174,7 +191,10 @@ class ApiService {
   }
 
   Future<List<Review>> listReviews(String songId) async {
-    final response = await _dio.get('/reviews', queryParameters: {'song_id': songId});
+    final response = await _dio.get(
+      '/reviews',
+      queryParameters: {'song_id': songId},
+    );
     final data = response.data as List<dynamic>;
     return data
         .map((item) => Review.fromJson(item as Map<String, dynamic>))
